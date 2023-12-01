@@ -22,10 +22,16 @@ const Madrasa = require('./models/Madrasa');
 // Require Madrasa Routes (Replace 'path-to-your-madrasa-routes' with the actual path)
 const madrasaRoutes = require('./routes/madrasaController');
 const teacherRoute = require('./routes/teacherController');
+const studentRoutes = require('./routes/studentController');
+const classRoutes = require('./routes/classController');
+
 
 // Use Madrasa Routes
 app.use('/api/madrasa', madrasaRoutes);
 app.use('/api/teacher',teacherRoute);
+app.use('/api/student',studentRoutes);
+app.use('/api/class',classRoutes);
+
 app.get((req,res)=>{
   res.send("wworking");
 })
