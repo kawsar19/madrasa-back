@@ -11,10 +11,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/vadira', {
+mongoose.connect('mongodb+srv://kawsarbinjahangir:mWIlmJjfHvxBTJpC@cluster0.ngiowav.mongodb.net/school', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
 
 // Define Madrasa Schema and Model (Replace 'path-to-your-madrasa-model' with the actual path)
 const Madrasa = require('./models/Madrasa');
