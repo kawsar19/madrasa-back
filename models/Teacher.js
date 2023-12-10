@@ -17,6 +17,11 @@ const teacherSchema = new mongoose.Schema({
   union:String,
   nidImage: String,
   emergencyPhoneNumber: String,
+  password: {
+    type: String,
+    default: '111111',
+    required: true,
+  },
   madrasa: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Madrasa',

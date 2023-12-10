@@ -35,9 +35,9 @@ app.use('/api/student',studentRoutes);
 app.use('/api/class',classRoutes);
 app.use('/api/payment',paymentRoutes);
 
-app.get((req,res)=>{
-  res.send("wworking");
-})
+app.get('/test', (req, res) => {
+  res.send('This is a test endpoint!');
+});
 // Start Server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

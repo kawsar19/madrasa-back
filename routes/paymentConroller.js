@@ -41,7 +41,25 @@ router.post('/create', async (req, res) => {
     res.status(500).json({ message: 'Failed to create payment', error: error.message });
   }
 });
+router.get('/list', async (req, res) => {
+  try {
+    let filter = {};
+    const { month, year } = req.query;
 
+    if (month) {
+      filter.month = month; // Assuming month is a string, adjust as needed
+    }
+
+    if (year) {
+      filter.year = year; // Assuming year is a number, adjust as needed
+    }
+
+    const payments = await Payment.find(filter).populate('student', 'fullName'); // Populate student field with name
+    res.status(200).json({ payments });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch payments', error: error.message });
+  }
+});
 
 
 router.get('/list-month-year', async (req, res) => {
@@ -106,9 +124,5 @@ router.get('/list-month-year', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch payments', error: error.message });
   }
 });
-
-
-
-
 
 module.exports = router;
