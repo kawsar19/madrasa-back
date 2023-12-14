@@ -80,6 +80,9 @@ router.get('/list', authenticateToken, async (req, res) => {
    }
 
    try {
+     if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
       let query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
 
       if (searchTerm) {
@@ -109,6 +112,21 @@ router.get('/list', authenticateToken, async (req, res) => {
    }
 });
 
+router.get('/totalStudents', authenticateToken, async (req, res) => {
+   try {
+      if (!req.user) {
+         return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
+      const totalStudents = await Student.countDocuments(query);
+
+      res.status(200).json({ totalStudents });
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+   }
+});
 
 
 
