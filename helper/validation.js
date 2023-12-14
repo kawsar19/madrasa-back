@@ -4,7 +4,8 @@ const createStudentSchema = Joi.object({
   fullName: Joi.string().required(),
   dateOfBirth: Joi.date().required(),
   studentClass: Joi.string().required(),
-  studentImage: Joi.string().allow('').optional(),
+  studentImage: Joi.string().empty(null).optional(), // Ensure it's not an empty string but allow null
+  
   gender: Joi.string().valid('Male', 'Female', 'Other').required(),
   phone: Joi.string().required(),
   address: Joi.object({

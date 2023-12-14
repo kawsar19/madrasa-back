@@ -2,8 +2,18 @@ const express = require('express');
 const router = express.Router();
 const Student = require('../models/Student');
 const { createStudentSchema } = require('../helper/validation');
-router.post('/create', async (req, res) => {
+
+const authenticateToken = require('../middlewares/authCheck');
+
+router.get('/checkToken', authenticateToken, (req, res) => {
+  res.status(200).json({ message: 'Token is valid', user: req.user });
+});
+router.post('/create', authenticateToken, async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  
     const validationResult = createStudentSchema.validate(req.body);
 
     if (validationResult.error) {
@@ -27,10 +37,10 @@ router.post('/create', async (req, res) => {
       imageUrl,
       guardianFullName,
       guardianPhoneNumber,
-      madrasa,
       studentImage,
       studentClass,
     } = req.body;
+    const {madrasa}=req.user
 
     const student = new Student({
       fullName,
@@ -56,28 +66,28 @@ router.post('/create', async (req, res) => {
 });
 
 
-router.get('/list', async (req, res) => {
+router.get('/list', authenticateToken, async (req, res) => {
    const page = Number(req.query.page) || 1;
    const limit = Number(req.query.limit) || 3;
    const searchTerm = req.query.q || ''; // Search term parameter
    const genderFilter = req.query.gender || ''; // Gender filter parameter
 
-   if(page < 1 || limit < 1){
+   if (page < 1 || limit < 1) {
       return res.status(400).json({
-         success:false,
-         message:"Sorry, page and limit must be greater than 0."
+         success: false,
+         message: "Sorry, page and limit must be greater than 0."
       });
    }
 
    try {
-      let query = {};
+      let query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
+
       if (searchTerm) {
          query.fullName = { $regex: new RegExp(searchTerm, 'i') }; // Searching by full name
       }
       if (genderFilter && ['Male', 'Female', 'Other'].includes(genderFilter)) {
          query.gender = genderFilter; // Filtering by gender
       }
-      console.log(query)
 
       const totalStudents = await Student.countDocuments(query);
       const totalPages = Math.ceil(totalStudents / limit);
@@ -98,6 +108,7 @@ router.get('/list', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
    }
 });
+
 
 
 

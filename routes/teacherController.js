@@ -4,6 +4,9 @@ const Teacher = require('../models/Teacher');
 const axios = require('axios');
 const OTP = require('../models/Otp');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const authenticateToken = require('../middlewares/authCheck'); // Import your middleware
+
 
 
 router.post('/create', async (req, res) => {
@@ -39,8 +42,66 @@ router.post('/create', async (req, res) => {
   }
 });
 
+// Login endpoint
+router.post('/login', async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    // Check if the teacher exists
+    const teacher = await Teacher.findOne({ phone });
+
+    if (!teacher) {
+      return res.status(404).json({ error: 'Teacher not found' });
+    }
+
+    // Validate password
+    const validPassword = await bcrypt.compare(password, teacher.password);
+
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    // Generate JWT token excluding sensitive data like password
+    const token = jwt.sign(
+      {
+        _id: teacher._id,
+        name: teacher.name,
+        phone: teacher.phone,
+        village: teacher.village,
+        upazila: teacher.upazila,
+        district: teacher.district,
+        division: teacher.division,
+        madrasa: teacher.madrasa,
+        // Add other data you want to include in the token payload
+      },
+    
+   //  process.env.JWT_SECRET_KEY, // Use your own secret key getTime'
+   '12345',
+      { expiresIn: '365d' } // Token expiration time
+    );
+
+    res.json({ token, user: {
+  _id: teacher._id,
+  name: teacher.name,
+  phone: teacher.phone,
+  village: teacher.village,
+  upazila: teacher.upazila,
+  district: teacher.district,
+  division: teacher.division,
+  madrasa: teacher.madrasa
+}});
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
+
+router.get('/checkToken', authenticateToken, (req, res) => {
+  res.status(200).json({ message: 'Token is valid', user: req.user });
+});
 // Endpoint to send OTP for teacher login
 router.post("/teacher-login-otp", async (req, res) => {
   const { phone } = req.body;
