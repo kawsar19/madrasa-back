@@ -6,6 +6,11 @@ const classNameSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  madrasa: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Madrasa',
+    required: true,
+  },
 });
 
 const ClassName = mongoose.model('ClassName', classNameSchema);

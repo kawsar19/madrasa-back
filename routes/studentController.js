@@ -9,6 +9,7 @@ router.get('/checkToken', authenticateToken, (req, res) => {
   res.status(200).json({ message: 'Token is valid', user: req.user });
 });
 router.post('/create', authenticateToken, async (req, res) => {
+  console.log(req.body)
   try {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -67,50 +68,57 @@ router.post('/create', authenticateToken, async (req, res) => {
 
 
 router.get('/list', authenticateToken, async (req, res) => {
-   const page = Number(req.query.page) || 1;
-   const limit = Number(req.query.limit) || 3;
-   const searchTerm = req.query.q || ''; // Search term parameter
-   const genderFilter = req.query.gender || ''; // Gender filter parameter
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 3;
+  const searchTerm = req.query.q || '';
+  const genderFilter = req.query.gender || '';
+  const classNameFilter = req.query.className || ''; // New className filter parameter
 
-   if (page < 1 || limit < 1) {
-      return res.status(400).json({
-         success: false,
-         message: "Sorry, page and limit must be greater than 0."
-      });
-   }
+  if (page < 1 || limit < 1) {
+    return res.status(400).json({
+      success: false,
+      message: "Sorry, page and limit must be greater than 0."
+    });
+  }
 
-   try {
-     if (!req.user) {
+  try {
+    if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-      let query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
 
-      if (searchTerm) {
-         query.fullName = { $regex: new RegExp(searchTerm, 'i') }; // Searching by full name
-      }
-      if (genderFilter && ['Male', 'Female', 'Other'].includes(genderFilter)) {
-         query.gender = genderFilter; // Filtering by gender
-      }
+    let query = { madrasa: req.user.madrasa };
 
-      const totalStudents = await Student.countDocuments(query);
-      const totalPages = Math.ceil(totalStudents / limit);
+    if (searchTerm) {
+      query.fullName = { $regex: new RegExp(searchTerm, 'i') };
+    }
+    if (genderFilter && ['Male', 'Female', 'Other'].includes(genderFilter)) {
+      query.gender = genderFilter;
+    }
+    if (classNameFilter) {
+      query.studentClass = classNameFilter;
+    }
 
-      const students = await Student.find(query)
-         .sort({ _id: -1 })
-         .skip((page - 1) * limit)
-         .limit(limit);
+    const totalStudents = await Student.countDocuments(query);
+    const totalPages = Math.ceil(totalStudents / limit);
 
-      res.status(200).json({
-         students,
-         currentPage: page,
-         totalPages,
-         totalStudents
-      });
-   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-   }
+    const students = await Student.find(query)
+      .populate('studentClass', 'className')
+      .sort({ _id: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      students,
+      currentPage: page,
+      totalPages,
+      totalStudents
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
+
 
 router.get('/totalStudents', authenticateToken, async (req, res) => {
    try {

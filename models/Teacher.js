@@ -22,6 +22,10 @@ const teacherSchema = new mongoose.Schema({
     default: '111111',
     required: true,
   },
+  madrasaName:{
+    type:String,
+    required:true
+  },
   madrasa: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Madrasa',

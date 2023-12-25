@@ -26,6 +26,7 @@ const teacherRoute = require('./routes/teacherController');
 const studentRoutes = require('./routes/studentController');
 const classRoutes = require('./routes/classController');
 const paymentRoutes = require('./routes/paymentConroller');
+const prayerRoutes = require('./routes/prayerRoutes');
 
 
 // Use Madrasa Routes
@@ -34,6 +35,7 @@ app.use('/api/teacher',teacherRoute);
 app.use('/api/student',studentRoutes);
 app.use('/api/class',classRoutes);
 app.use('/api/payment',paymentRoutes);
+app.use('/api/prayer',prayerRoutes);
 
 app.get('/test', (req, res) => {
   res.send('This is a test endpoint!');

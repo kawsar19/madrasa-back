@@ -1,11 +1,16 @@
-
 const express = require('express');
 const router = express.Router();
 const ClassName = require('../models/ClassName');
-router.post('/create', async (req, res) => {
+const authenticateToken = require('../middlewares/authCheck');
+
+router.post('/create', authenticateToken, async (req, res) => {
   try {
+        if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    } 
+    const {madrasa}=req.user
     const { className } = req.body;
-    const newClass = new ClassName({ className });
+    const newClass = new ClassName({ className, madrasa: madrasa });
     const savedClass = await newClass.save();
     res.status(201).json(savedClass);
   } catch (error) {
@@ -13,19 +18,25 @@ router.post('/create', async (req, res) => {
     res.status(500).json({ error: 'Server Error' });
   }
 });
-router.get('/list', async (req, res) => {
+
+router.get('/list', authenticateToken, async (req, res) => {
   try {
-    const classes = await ClassName.find();
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const classes = await ClassName.find({ madrasa: req.user.madrasa }).populate('madrasa', 'name');
     res.status(200).json(classes);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server Error' });
   }
 });
+
+
 router.get('/classes/:id', async (req, res) => {
   try {
     const classId = req.params.id;
-    const foundClass = await ClassName.findById(classId);
+    const foundClass = await ClassName.findById(classId).populate('madrasa', 'name'); // Assuming 'name' as the field to be populated
     if (!foundClass) {
       return res.status(404).json({ error: 'Class not found' });
     }
@@ -35,6 +46,7 @@ router.get('/classes/:id', async (req, res) => {
     res.status(500).json({ error: 'Server Error' });
   }
 });
+
 router.put('/update/:id', async (req, res) => {
   try {
     const classId = req.params.id;
@@ -53,6 +65,7 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Server Error' });
   }
 });
+
 router.delete('/delete/:id', async (req, res) => {
   try {
     const classId = req.params.id;
@@ -67,4 +80,4 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
-module.exports=router;
+module.exports = router;

@@ -11,7 +11,7 @@ const authenticateToken = require('../middlewares/authCheck'); // Import your mi
 
 router.post('/create', async (req, res) => {
   try {
-    const { name, phone, village, upazila, district, division,union, emergencyPhoneNumber, madrasa, nidImage, password } = req.body;
+    const { name, phone, village, upazila, district, division,union, emergencyPhoneNumber, madrasa, nidImage, password, madrasaName} = req.body;
 
     // Extracting the uploaded file from the reques
     
@@ -30,7 +30,8 @@ router.post('/create', async (req, res) => {
       nidImage,
       union,
       emergencyPhoneNumber,
-      madrasa,
+      madrasa, 
+      madrasaName,
       password:hashedPassword
     });
 
@@ -72,6 +73,7 @@ router.post('/login', async (req, res) => {
         district: teacher.district,
         division: teacher.division,
         madrasa: teacher.madrasa,
+        madrasaName:teacher.madrasaName
         // Add other data you want to include in the token payload
       },
     
@@ -88,7 +90,8 @@ router.post('/login', async (req, res) => {
   upazila: teacher.upazila,
   district: teacher.district,
   division: teacher.division,
-  madrasa: teacher.madrasa
+  madrasa: teacher.madrasa, 
+  madrasaName:teacher.madrasaName
 }});
 
   } catch (error) {
@@ -248,6 +251,22 @@ router.delete('/delete/:id', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+});
+
+router.get('/total-teachers', authenticateToken, async (req, res) => {
+   try {
+      if (!req.user) {
+         return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
+      const totalTeachers = await Teacher.countDocuments(query);
+
+      res.status(200).json({ totalTeachers});
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+   }
 });
 
 module.exports = router;

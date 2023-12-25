@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Madrasa = require('../models/Madrasa');
 
+
 // Create Madrasa
 router.post('/create', async (req, res) => {
   try {
