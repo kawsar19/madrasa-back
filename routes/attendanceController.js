@@ -3,8 +3,11 @@ const router = express.Router();
 const Attendance = require("../models/Attendance");
 const authenticateToken = require("../middlewares/authCheck");
 const { attendanceSchema } = require("../helper/validation");
+const mongoose = require("mongoose");
 
 // Your middleware or authentication checks could be added here if needed
+
+//  create a single student attendance
 
 router.post("/create-single", authenticateToken, async (req, res) => {
   try {
@@ -43,6 +46,7 @@ router.post("/create-single", authenticateToken, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+//  crete multiple student attendance
 router.post("/create-multiple", authenticateToken, async (req, res) => {
   try {
     if (!req.user) {
@@ -109,7 +113,7 @@ router.post("/create-multiple", authenticateToken, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
+//  get all attendance of a student
 router.get(
   "/student-attendance/:studentId",
   authenticateToken,
@@ -140,5 +144,31 @@ router.get(
     }
   }
 );
+//  get all attendance of a class
+router.get("/class-attendance", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { month, classId, year } = req.query;
+    const startMonth = parseInt(month, 10); // Ensure month is a number
+    const startYear = parseInt(year, 10); // Ensure year is a number
+
+    const startDate = new Date(startYear, startMonth - 1, 1);
+    const endDate = new Date(startYear, startMonth, 0);
+
+    const classAttendance = await Attendance.find({
+      studentClass: classId,
+      date: { $gte: startDate, $lte: endDate },
+    }).populate("student", "fullName");
+    // Fields to select from the student model
+    // .select("_id date status student");
+
+    res.status(200).json(classAttendance);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 
 module.exports = router;
