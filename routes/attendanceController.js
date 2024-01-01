@@ -130,8 +130,14 @@ router.get(
       // Validate month and year if needed
 
       // Fetch attendance records for the specified student in the given month and year
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0); // Set the time to the end of the day automatically (i.e., 23:59:59)
+     // const startDate = new Date(year, month - 1, 1);
+ //  const endDate = new Date(year, month, 0); // Set the time to the end of the day automatically (i.e., 23:59:59)
+ 
+ const startDate = new Date(year, month - 1, 1);
+const endDate = new Date(year, month - 1, 31, 23, 59, 59); // Setting time to end of the day (23:59:59)
+
+      console.log(startDate)
+      console.log(endDate)
 
       const studentAttendance = await Attendance.find({
         student: studentId,
@@ -145,7 +151,7 @@ router.get(
   }
 );
 //  get all attendance of a class
-router.get("/class-attendance", authenticateToken, async (req, res) => {
+/*router.get("/class-attendance", authenticateToken, async (req, res) => {
   try {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -169,6 +175,38 @@ router.get("/class-attendance", authenticateToken, async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
+});*/
+router.get("/class-attendance", authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { month, classId, year } = req.query;
+    const startMonth = parseInt(month, 10); // Ensure month is a number
+    const startYear = parseInt(year, 10); // Ensure year is a number
+
+    const startDate = new Date(startYear, startMonth - 1, 1);
+    const endDate = new Date(startYear, startMonth, 0);
+
+    let attendanceQuery = {
+      date: { $gte: startDate, $lte: endDate },
+    };
+
+    if (classId) {
+      attendanceQuery.studentClass = classId;
+    }
+
+    const classAttendance = await Attendance.find(attendanceQuery).populate(
+      "student",
+      "fullName"
+    );
+
+    res.status(200).json(classAttendance);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
+
 
 module.exports = router;

@@ -80,4 +80,20 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
+router.get('/total-classes', authenticateToken, async (req, res) => {
+   try {
+      if (!req.user) {
+         return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
+      const totalClassName = await ClassName.countDocuments(query);
+
+      res.status(200).json({ totalClassName});
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+   }
+});
+
 module.exports = router;

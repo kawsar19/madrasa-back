@@ -33,7 +33,7 @@ const attendanceSchema = Joi.object({
     .pattern(/^[0-9a-fA-F]{24}$/)
     .required(), // Assuming it's a valid ObjectId string
   date: Joi.date().required(),
-  status: Joi.string().valid("present", "absent", "leave").required(),
+  status: Joi.string().valid("present", "absent", "leave","closed").required(),
 });
 
 module.exports = {

@@ -7,8 +7,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middlewares/authCheck'); // Import your middleware
 
-
-
 router.post('/create', async (req, res) => {
   try {
     const { name, phone, village, upazila, district, division,union, emergencyPhoneNumber, madrasa, nidImage, password, madrasaName} = req.body;
@@ -73,7 +71,8 @@ router.post('/login', async (req, res) => {
         district: teacher.district,
         division: teacher.division,
         madrasa: teacher.madrasa,
-        madrasaName:teacher.madrasaName
+        madrasaName:teacher.madrasaName,
+
         // Add other data you want to include in the token payload
       },
     
@@ -91,7 +90,8 @@ router.post('/login', async (req, res) => {
   district: teacher.district,
   division: teacher.division,
   madrasa: teacher.madrasa, 
-  madrasaName:teacher.madrasaName
+  madrasaName:teacher.madrasaName, 
+  image:teacher.nidImage
 }});
 
   } catch (error) {
@@ -148,7 +148,6 @@ router.post("/teacher-login-otp", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // Update Teacher with Image Upload
 router.put('/update/:id', async (req, res) => {

@@ -69,7 +69,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 
 router.get('/list', authenticateToken, async (req, res) => {
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 3;
+  const limit = Number(req.query.limit) || 100;
   const searchTerm = req.query.q || '';
   const genderFilter = req.query.gender || '';
   const classNameFilter = req.query.className || ''; // New className filter parameter
