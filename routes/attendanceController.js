@@ -208,5 +208,35 @@ router.get("/class-attendance", authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/test',authenticateToken, async (req,res)=>{
+  console.log(req.query)
 
+  try {
+    if(!req.user){
+      res.status(401).json({
+        error:'Unauthorized'
+      })
+    }
+    
+    const {month, classIdclass,year}=req.query
+    const startMonth=parseInt(month,10);
+    const startYear=parseInt(year,10)
+    const startDate = new Date(startYear, startMonth - 1, 1);
+    const endDate = new Date(startYear, startMonth, 0);
+    res.json({
+      message:'hello world ',
+      user:req.user,
+      query:{
+        startMonth,
+        startYear
+      },
+      startDate,
+      endDate
+    })
+  }catch(err) {
+    res.status(400).json({
+      message:err.message
+    })
+  }
+})
 module.exports = router;
