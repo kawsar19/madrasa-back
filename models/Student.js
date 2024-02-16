@@ -42,7 +42,29 @@ const studentSchema = new mongoose.Schema({
     madrasa: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Madrasa',
-    }
+    },
+    monthlyFee: {
+        type: Number,
+        required: false, 
+        default:0
+    },
+    payments: [
+        {
+            month: String,
+            year: Number,
+            amount: Number,
+            paid: Boolean,
+            discount: Number,
+            paymentMethod: String,
+            receivedBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Teacher', // Reference to the Teacher model/schema
+            },
+            paymentDate: Date,
+            transactionID: String,
+            remarks: String,
+        }
+    ]
 });
 
 const Student = mongoose.model('Student', studentSchema);

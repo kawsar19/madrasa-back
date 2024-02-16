@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Student = require('../models/Student');
-const { createStudentSchema } = require('../helper/validation');
+const { createStudentSchema, createPaymentSchema} = require('../helper/validation');
 
 const authenticateToken = require('../middlewares/authCheck');
 
@@ -100,12 +100,22 @@ router.get('/list', authenticateToken, async (req, res) => {
 
     const totalStudents = await Student.countDocuments(query);
     const totalPages = Math.ceil(totalStudents / limit);
-
+    /*
+    await Student.updateMany(
+      query,
+      { $set: { monthlyFee: 0 } }
+    );
+*/
     const students = await Student.find(query)
-      .populate('studentClass', 'className')
-      .sort({ _id: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+  .populate('studentClass', 'className')
+  .populate({
+    path: 'payments.receivedBy',
+    select: 'name',
+    model: 'Teacher' // Assuming 'Teacher' is the name of the model for teachers
+  })
+  .sort({ _id: -1 })
+  .skip((page - 1) * limit)
+  .limit(limit);
 
     res.status(200).json({
       students,
@@ -120,21 +130,6 @@ router.get('/list', authenticateToken, async (req, res) => {
 });
 
 
-router.get('/totalStudents', authenticateToken, async (req, res) => {
-   try {
-      if (!req.user) {
-         return res.status(401).json({ error: 'Unauthorized' });
-      }
-
-      const query = { madrasa: req.user.madrasa }; // Filtering by the authenticated teacher's 'Madrasa'
-      const totalStudents = await Student.countDocuments(query);
-
-      res.status(200).json({ totalStudents });
-   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-   }
-});
 
 
 
@@ -164,6 +159,82 @@ router.delete('/delete/:id', async (req, res) => {
    }
 });
 
+router.post('/set-monthly-fee/:id', authenticateToken, async (req, res) => {
+   const { id } = req.params;
+   const { monthlyFee } = req.body;
+
+   try {
+     console.log(req.user)
+      if (!req.user) {
+         return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const student = await Student.findById(id);
+
+      if (!student) {
+         return res.status(404).json({ error: 'Student not found' });
+      }
+
+      student.monthlyFee = monthlyFee;
+      await student.save();
+
+      res.status(200).json({ message: 'Monthly fee updated successfully', student });
+   } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+   }
+});
+router.post('/create-payment/:studentId', authenticateToken, async (req, res) => {
+  try {
+    // Check if the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    console.log(req.body)
+    /*
+    // Validate the request body
+    const validationResult = createPaymentSchema.validate(req.body);
+    if (validationResult.error) {
+      return res.status(400).json({ error: validationResult.error.details[0].message });
+    }*/
+
+    // Extract relevant data from the request body
+    const { month, year, amount, paid, discount, paymentMethod, receivedBy, paymentDate, transactionID, remarks } = req.body;
+    const { studentId } = req.params; // Extract studentId from req.params
+
+    // Check if the student exists
+    const existingStudent = await Student.findById(studentId);
+    if (!existingStudent) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Create the payment object
+    const payment = {
+      month,
+      year,
+      amount,
+      paid,
+      discount,
+      paymentMethod,
+      receivedBy, // Assuming receivedBy is the teacher's ID
+      paymentDate,
+      transactionID,
+      remarks
+    };
+
+    // Add the payment to the student's payments array
+    existingStudent.payments.push(payment);
+
+    // Save the updated student document
+    await existingStudent.save();
+
+    // Respond with success message and the created payment
+    res.status(201).json({ message: 'Payment created successfully', payment });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
 
 
 module.exports = router;

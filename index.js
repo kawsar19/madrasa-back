@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(bodyParser.json());
@@ -31,7 +31,7 @@ const paymentRoutes = require("./routes/paymentConroller");
 const prayerRoutes = require("./routes/prayerRoutes");
 const attendanceRoutes = require("./routes/attendanceController");
 
-// Use Madrasa Routes
+// Use Madrasa R
 app.use("/api/madrasa", madrasaRoutes);
 app.use("/api/teacher", teacherRoute);
 app.use("/api/student", studentRoutes);
