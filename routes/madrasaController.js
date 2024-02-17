@@ -61,6 +61,7 @@ router.get('/list', async (req, res) => {
       }
     ]);
     res.json(madrasas);
+  // res.send("ok")
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

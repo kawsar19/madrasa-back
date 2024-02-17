@@ -30,6 +30,8 @@ const classRoutes = require("./routes/classController");
 const paymentRoutes = require("./routes/paymentConroller");
 const prayerRoutes = require("./routes/prayerRoutes");
 const attendanceRoutes = require("./routes/attendanceController");
+const monthlyBillType = require("./routes/monthlyBillTypeController");
+
 
 // Use Madrasa R
 app.use("/api/madrasa", madrasaRoutes);
@@ -39,6 +41,7 @@ app.use("/api/class", classRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/prayer", prayerRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/monthlybilltype", monthlyBillType);
 
 app.get("/test", (req, res) => {
   res.send("This is a test endpoint!");

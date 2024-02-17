@@ -1,52 +1,33 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student',
-    required: true,
-  },
-  month: {
-  type: String,
-  enum: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-  required: true,
-},
-
-  year: {
-    type: Number,
-    required: true,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
-  paid: {
-    type: Boolean,
-    default: false,
-  },
-  discount: {
-    type: Number,
-    default: 0,
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['bkash', 'nogod', 'cash', /* ... other methods */],
-    required: true,
-  },
-  receivedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Teacher',
-    required: true,
-  },
-  paymentDate: {
-    type: Date,
-  },
-  transactionID: {
-    type: String,
-  },
-  remarks: {
-    type: String,
-  },
+    student: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student', // Reference to the Student schema/table
+        required: true,
+    },
+    madrasa: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Madrasa', // Reference to the Madrasa schema/table
+        required: true,
+    },
+    month: {
+        type: String,
+        enum: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        required: true,
+    },
+    year: Number,
+    amount: Number,
+    paid: Boolean,
+    discount: Number,
+    paymentMethod: String,
+    receivedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Teacher', // Reference to the Teacher model/schema
+    },
+    paymentDate: Date,
+    transactionID: String,
+    remarks: String,
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);

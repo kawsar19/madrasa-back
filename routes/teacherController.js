@@ -100,8 +100,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-
 router.get('/checkToken', authenticateToken, (req, res) => {
   res.status(200).json({ message: 'Token is valid', user: req.user });
 });
@@ -185,7 +183,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
-// Rest of your routes remain unchanged
+
 
 
 // Get list of Teachers
@@ -198,7 +196,28 @@ router.get('/list', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+router.get('/madrasa-teachers', authenticateToken, async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
+    const madrasa = req.query.madrasa; // Get the madrasa from the query parameters
+
+    // Check if the authenticated user has access to the specified madrasa
+    if (req.user.madrasa !== madrasa) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Query teachers belonging to the specified madrasa
+    const teachers = await Teacher.find({ madrasa });
+
+    res.status(200).json({ teachers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 // Update Teacher
 router.put('/update/:id', async (req, res) => {
   try {
